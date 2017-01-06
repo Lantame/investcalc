@@ -1,0 +1,54 @@
+{
+    "__type__": "Calculator",
+    "rates": {
+        "__type__": "Rates",
+        "rates": [
+            {
+                "__type__": "Rate",
+                "c1": "USD",
+                "c2": "RUB",
+                "values": [
+                        [
+                            ["01.01.2016", 70.0],
+                            ["01.12.2016", 61.0]
+                        ]
+                    ]
+            },
+            {
+                "__type__": "Rate",
+                "c1": "EUR",
+                "c2": "RUB",
+                "values": [
+                        [
+                            ["01.01.2016", 75.0],
+                            ["01.12.2016", 64.0]
+                        ]
+                    ]
+            }
+            ]
+    },
+    "investment": {
+        "__type__": "InvestmentGroup",
+        "name": "My Investments",
+        "investments": [
+            {
+                "__type__": "InvestmentGroup",
+                "name": "Empty Group",
+                "investments": []
+            },
+            {
+                "__type__": "Investment",
+                "name": "Вклад в МКБ",
+                "values": [
+                        [
+                            ["01.01.2016", 100000],
+                            ["01.12.2016", 110000]
+                        ]
+                    ],
+                "currency": "RUB",
+                "method_name": "linear"
+            }
+        ]
+    }
+}
+
