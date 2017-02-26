@@ -65,27 +65,29 @@ def percent_yearly(x, y, days):
     return "?"
 
 
-def do_forecast(calc):
+def do_forecast(calc, currency, last_date, fc_date):
+    print "="*79 + "\n" + currency + "\n" + "="*79
+    last = calc.investment.calculate_dict(last_date, currency, calc.rates)
+    fc = calc.investment.calculate_dict(fc_date, currency, calc.rates)
+
+    last_plain = do_make_plain(last)
+    fc_plain = do_make_plain(fc)
+
+    Row = namedtuple("Row", ["name", "last", "forecast", "change", "yearly"])
+    rows = [Row("Investment", str(last_date), str(fc_date), "% change", "% yearly")]
+    for k in sorted(fc_plain):
+        rows.append(Row(
+            k,
+            "{:.2f}".format(last_plain[k]),
+            "{:.2f}".format(fc_plain[k]),
+            percent(fc_plain[k], last_plain[k]),
+            percent_yearly(fc_plain[k], last_plain[k], (fc_date-last_date).days)))
+    pprinttable(rows, True)
+
+def forecast(calc):
     for currency in ["RUR", "USD"]:
-        print "="*79 + "\n" + currency + "\n" + "="*79
-        last_date = datetime.date(2016, 07, 17)
-        fc_date = datetime.date(2017, 01, 06)
-        last = calc.investment.calculate_dict(last_date, currency, calc.rates)
-        fc = calc.investment.calculate_dict(fc_date, currency, calc.rates)
+        do_forecast(calc, currency, datetime.date(2016, 07, 17), datetime.date(2017, 01, 06))
 
-        last_plain = do_make_plain(last)
-        fc_plain = do_make_plain(fc)
-
-        Row = namedtuple("Row", ["name", "last", "forecast", "change", "yearly"])
-        rows = [Row("Investment", str(last_date), str(fc_date), "% change", "% yearly")]
-        for k in sorted(fc_plain):
-            rows.append(Row(
-                k,
-                "{:.2f}".format(last_plain[k]),
-                "{:.2f}".format(fc_plain[k]),
-                percent(fc_plain[k], last_plain[k]),
-                percent_yearly(fc_plain[k], last_plain[k], (fc_date-last_date).days)))
-        pprinttable(rows, True)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Calculator")
@@ -105,4 +107,4 @@ if __name__ == "__main__":
         parser.print_usage()
         sys.exit(1)
 
-    do_forecast(calc)
+    forecast(calc)
