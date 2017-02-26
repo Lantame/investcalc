@@ -4,6 +4,7 @@ import sys
 from rate import Rate, Rates
 from investment import Investment, InvestmentGroup
 from calculator import Calculator
+from inflation import Inflation, Inflations
 
 def hook(d):
     if "__type__" not in d:

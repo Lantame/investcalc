@@ -4,6 +4,7 @@ from investment import Investment, InvestmentGroup
 from values import parse_values
 from calculator import Calculator
 from rate import Rate, Rates
+from inflation import Inflation, Inflations
 
 currencies = ["RUR", "USD", "EUR"]
 
@@ -34,6 +35,7 @@ def import_csv(filename, skip=0):
             csvfile.readline()
         r = csv.DictReader(csvfile, delimiter=";")
         rates = Rates()
+        inflations = Inflations()
         main_group = InvestmentGroup("main", [])
         cur_group = None
         last_group = None
@@ -48,6 +50,13 @@ def import_csv(filename, skip=0):
                 rate = Rate(parts[0], parts[1], import_values(r, row))
                 rates.add(rate)
                 print "<- {} / {}".format(parts[0], parts[1])
+                continue
+
+            if len(parts) == 2 and parts[0].tolower() == "inflation":
+                # inflations
+                inflation = Inflation(parts[1], import_values(r, row))
+                inflations.add(inflation)
+                print "<- inflation / {}".format(parts[1])
                 continue
 
             if row[""] in currencies:
@@ -75,5 +84,5 @@ def import_csv(filename, skip=0):
             last_group.investments.append(inv)
             print "<- {} <- {} <- {}".format(cur_group.name, last_group.name, inv.name)
 
-        return Calculator(main_group, rates)
+        return Calculator(main_group, rates, inflations)
 
