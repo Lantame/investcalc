@@ -4,7 +4,7 @@ import argparse
 from collections import namedtuple
 
 from config import load, dump
-from import_config import import_csv
+from import_config import import_file
 
 
 def pprinttable(rows, header=False):
@@ -16,7 +16,7 @@ def pprinttable(rows, header=False):
             headers = rows[0]._fields
         lens = []
         for i in range(len(rows[0])):
-            lens.append(len(max([x[i] for x in rows] + [headers[i]],key=lambda x:len(unicode(x)))))
+            lens.append(len(max([x[i] for x in rows] + [headers[i]],key=lambda x:len(x))))
         formats = []
         hformats = []
         for i in range(len(rows[0])):
@@ -92,12 +92,14 @@ def forecast(calc):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Calculator")
     parser.add_argument("--config", help="path to config file")
-    parser.add_argument("--csv", help="path to csv file")
+    parser.add_argument("--import_file", help="path to imported file")
+    parser.add_argument("--import_params", help="import parameters: x=y,v=w", default="")
 
     args = parser.parse_args()
     calc = None
-    if args.csv:
-        calc = import_csv(args.csv, 1)
+    if args.import_file:
+        params = dict(param.split("=") for param in args.import_params.split(",") if param)
+        calc = import_file(args.import_file, params)
         if args.config:
             dump(args.config, calc.dump())
             sys.exit(0)

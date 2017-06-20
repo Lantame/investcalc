@@ -1,4 +1,6 @@
 import csv
+import os.path
+import subprocess
 
 from investment import Investment, InvestmentGroup
 from values import parse_values
@@ -7,6 +9,7 @@ from rate import Rate, Rates
 from inflation import Inflation, Inflations
 
 currencies = ["RUR", "USD", "EUR"]
+tmpdir = "/tmp"
 
 
 def import_values(r, row):
@@ -29,17 +32,18 @@ def import_values(r, row):
     return parse_values(values)
 
 
-def import_csv(filename, skip=0):
+def import_csv(filename, params):
     with open(filename) as csvfile:
-        for i in xrange(skip):
+        for i in xrange(int(params.get("skip", 0))):
             csvfile.readline()
-        r = csv.DictReader(csvfile, delimiter=";")
+        r = csv.DictReader(csvfile, delimiter=",")
         rates = Rates()
         inflations = Inflations()
         main_group = InvestmentGroup("main", [])
         cur_group = None
         last_group = None
         for row in r:
+            print row
             if not row[""]:
                 cur_group = last_group = main_group
                 continue
@@ -52,7 +56,7 @@ def import_csv(filename, skip=0):
                 print "<- {} / {}".format(parts[0], parts[1])
                 continue
 
-            if len(parts) == 2 and parts[0].tolower() == "inflation":
+            if len(parts) == 2 and parts[0].lower() == "inflation":
                 # inflations
                 inflation = Inflation(parts[1], import_values(r, row))
                 inflations.add(inflation)
@@ -86,3 +90,33 @@ def import_csv(filename, skip=0):
 
         return Calculator(main_group, rates, inflations)
 
+
+def import_libreoffice(filename, params):
+    retcode = subprocess.call([
+        "libreoffice",
+        "--headless",
+        "--convert-to",
+        "csv:Text - txt - csv (StarCalc):44,34,0,1,1",
+        "--outdir",
+        tmpdir,
+        filename
+    ])
+    if retcode:
+        raise ValueError("failed to convert to CSV: {}".format(filename))
+
+    bn = os.path.basename(filename)
+    root, ext = os.path.splitext(bn)
+    csvfile = os.path.join(tmpdir, root + ".csv")
+    return import_csv(csvfile, params)
+
+
+def import_file(filename, params):
+    if not os.path.exists(filename):
+        raise ValueError("path does not exist: {}".format(filename))
+
+    _, ext = os.path.splitext(filename)
+    return ext_to_func.get(ext.lower(), import_libreoffice)(filename, params)
+
+ext_to_func = {
+        ".csv": import_csv
+        }
